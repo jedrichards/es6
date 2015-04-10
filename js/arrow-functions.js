@@ -12,7 +12,7 @@ var odd = n => n % 2;
 
 assert.equal(odd(2),false);
 assert.equal(odd(3),true);
-console.log(Math.random());
+
 // Lexical this
 
 function TimeoutTest () {
