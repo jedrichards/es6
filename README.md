@@ -23,9 +23,10 @@ npm run watch --es6:example=arrow-functions
 ## Features
 
 - [Arrow function](#arrow-function)
-- [`let`](#let)
-- [`const`](#const)
+- [Let](#let)
+- [Const](#const)
 - [Modules](#modules)
+- [Template strings](#template-strings)
 
 ## Arrow function
 
@@ -302,3 +303,68 @@ import _,{each} from 'underscore';
 ```
 
 > The default export can be imported along with any named exports.
+
+#### Module loader API
+
+```js
+System
+  .import('some-module')
+  .then(someModule => {})
+  .catch(error => {});
+```
+
+> Modules can be loaded dynamically and conditionally via the loader API exposed by `System`. A common use of `System.import` could be to bootstrap a transpiled ES6 app in a `<script>` tag in a ES5-based browser environment.
+
+## Template strings
+
+### Description
+
+ES6 template strings, denoted by backticks rather than single or double quotes, enable multiline strings, template literals (expression substitution) and tagged templates.
+
+### Examples
+
+#### Multiline
+
+```js
+var address = `29 Acacia Road,
+Nuttytown,
+England`;
+```
+
+> All whitespace characters in backtick template strings are preserved, so no extra formatting is required.
+
+#### Template literals
+
+```js
+var name = "Billy";
+var born = 1992;
+var now = () => new Date().getFullYear();
+
+var message = `${name} is ${now()-born} years old`;
+// "Billy is 23 years old"
+```
+
+> Template strings are able to evaluate any expression against their current scope using `${}` syntax. :warning: Be careful when building strings in this way from user input since you may introduce injection vulnerabilities, see tagged templates below for an alternative approach.
+
+#### Tagged templates
+
+Tagged templates provide an abstracted and safer approach to string concatenation with dynamic values.
+
+They work by providing a layer of syntactic sugar over the process of implementing dynamic template generating functions.
+
+```js
+function foo (literals,...values) {
+    console.log(literals); // ['',' is ',' years old']
+    console.log(values); // ['Billy',23]
+    return 'foo';
+}
+
+var name = "Billy";
+var born = 1992;
+var now = () => new Date().getFullYear();
+
+var message = foo`${name} is ${now()-born} years old`;
+// "foo"
+```
+
+> By using the ``func`string`;`` syntax we invoke a template tag, that is a function to be run in order to process a template string. The first argument to the template tag is an array containing the sequence of plain strings, which is followed by the evaluated results of any expressions.

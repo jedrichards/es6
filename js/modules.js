@@ -1,3 +1,3 @@
-import _,{each} from './mod';
+import * as mod from './mod';
 
-console.log(_,each);
+console.log(mod);
