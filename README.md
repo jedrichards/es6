@@ -20,15 +20,18 @@ Watch an example and re-run when it changes,
 npm run watch --es6:example=arrow-functions
 ```
 
-## Table of contents
+## Features
 
-- [Arrow functions](#arrow-functions)
+- [Arrow function](#arrow-function)
+- [`let`](#let)
+- [`const`](#const)
+- [Modules](#modules)
 
-## Arrow functions
+## Arrow function
 
 ### Description
 
-Arrow functions are a concise function syntax, and their `this` value is lexically bound to their enclosing scope.
+Arrow functions are a concise anonymous function syntax, and their `this` value is lexically bound to their enclosing scope.
 
 ### Examples
 
@@ -78,6 +81,8 @@ function Counter () {
   this.count = 0;
   setInterval(() => this.count++, 1000);
 }
+
+var counter = new Counter();
 ```
 
 > The arrow function's `this` value is bound to the enclosing scope, so no more need for `var self = this`.
@@ -91,7 +96,7 @@ console.log(lengths); // [3, 3, 5]
 
 > Arrow functions can be used to write iterators and map functions quite concisely.
 
-## Let
+## `let`
 
 ### Description
 
@@ -166,7 +171,7 @@ if ( foo ) {
 
 > Using `let` within an `if` block implicitly creates a new scope. This is a hazard of using `let`. The new scope is easily spotted in the simple example above, but when code becomes more complicated hunting for new scopes created by `let` could become a cognitive burden. A rule of thumb is to place `let` declarations at the top of their enclosing block to clearly signpost their use and also avoid being bitten by the TDZ.
 
-## Const
+## `const`
 
 ### Description
 
@@ -174,14 +179,14 @@ The `const` keyword works much the same as the `let` keyword in that it declares
 
 ### Examples
 
-#### Read only const
+#### Read only
 
 ```js
 const foo = 'foo';
 foo = 'bar' // Error, foo is read only
 ```
 
-#### Constant reference
+#### References
 
 ```js
 const a = [];
@@ -189,3 +194,111 @@ a.push('foo');
 ```
 
 > The above code does produce an error, since the `const` keyword only safeguards the pointer to the value, not the value itself, which may change.
+
+## Modules
+
+### Description
+
+ES6 modules will standardise module loading in JavaScript with a concise syntax that removes the need for the competing CommonJS, AMD and UMD module standards and libraries.
+
+Since ES6 modules are part of the language their structure can be statically analysed (at compile time), which is in contrast to the current library-based module loaders which can only reveal their structure by running the code. This paves the way for better static analysis tools, static types and macros in future JavaScript.
+
+ES6 modules use a declarative syntax for importing and exporting, support cyclic dependencies and support an async programmatic loading API for dynamically/conditionally loading modules at runtime.
+
+Future browser APIs will be exposed as ES6 modules instead of global variables, properties of `navigator` or object namespaces such as `Math` and `JSON`.
+
+### Examples
+
+#### Named exports
+
+Consider the module `math`,
+
+```js
+// math.js
+export const PI = Math.PI;
+export function add(a,b) => a+b;
+export function subtract(a,b) => a-b;
+```
+
+And a module `app`, which consumes the `math` module,
+
+```js
+// app.js
+import {PI,add,subtract} from 'math';
+PI; // 3.141592653589793
+add(1,1); // 2
+```
+
+> Named exports can be individually imported and will manifest in the scope of the importing module.
+
+```js
+// app.js
+import * as math from 'math';
+math.add(1,1); // 2
+math.subtract(2,1); // 1
+```
+
+> All named exports can be imported via the wildcard `*` character, in which case they will populate the supplied object namespace.
+
+```js
+// math.js
+const PI = Math.PI;
+function add(a,b) => a+b;
+function subtract(a,b) => a-b;
+
+export {PI,add,subtract};
+```
+
+> Named exports can alternatively be declared separately to the object they're exporting.
+
+```js
+// math.js
+const PI = Math.PI;
+function add(a,b) => a+b;
+function subtract(a,b) => a-b;
+
+export {subtract as minus};
+```
+
+> Exported names can be different from the one used internally to the module.
+
+```js
+// app.js
+import {subtract as minus} from 'math';
+math.minus(2,1); // 1
+```
+
+> Imported names can also be changed.
+
+#### Default exports
+
+Modules can indicate a default object to always be imported when no name is supplied.
+
+Default exports are to be favoured over named exports since they simplify module APIs.
+
+Consider the Underscore library refactored as an ES6 module,
+
+```js
+// underscore.js
+export default {
+    each: each
+}
+
+export function each (obj,iterator,context) {};
+```
+
+And a module `app`, which consumes the `underscore` module,
+
+```js
+// app.js
+import _ from 'underscore';
+```
+
+> When importing the default export directly the `{}` named export syntax is not required.
+
+```js
+// app.js
+import _,{each} from 'underscore';
+```
+
+> The default export can be imported along with any named exports.
