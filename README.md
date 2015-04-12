@@ -27,6 +27,7 @@ npm run watch --es6:example=arrow-functions
 - [Const](#const)
 - [Modules](#modules)
 - [Template strings](#template-strings)
+- [Classes](#classes)
 
 ## Arrow function
 
@@ -319,7 +320,7 @@ System
 
 ### Description
 
-ES6 template strings, denoted by backticks rather than single or double quotes, enable multiline strings, template literals (expression substitution) and tagged templates.
+ES6 template strings, denoted by backticks rather than single or double quotes, enable multiline strings, expression substitution and tagged templates.
 
 ### Examples
 
@@ -333,7 +334,7 @@ England`;
 
 > All whitespace characters in backtick template strings are preserved, so no extra formatting is required.
 
-#### Template literals
+#### Expression substitution
 
 ```js
 var name = "Billy";
@@ -350,7 +351,7 @@ var message = `${name} is ${now()-born} years old`;
 
 Tagged templates provide an abstracted and safer approach to string concatenation with dynamic values.
 
-They work by providing a layer of syntactic sugar over the process of implementing dynamic template generating functions.
+They work by providing a layer of syntactic sugar over the process of implementing dynamic template generating functions. These functions are referred to as template tags.
 
 ```js
 function foo (literals,...values) {
@@ -368,3 +369,51 @@ var message = foo`${name} is ${now()-born} years old`;
 ```
 
 > By using the ``func`string`;`` syntax we invoke a template tag, that is a function to be run in order to process a template string. The first argument to the template tag is an array containing the sequence of plain strings, which is followed by the evaluated results of any expressions.
+
+> Template tags could be used by libraries to variously escape user input, strip tags, perform internationalisation or provide any other string-based functionality via an arbitrary DSL.
+
+## Classes
+
+### Description
+
+ES6 classes provide a standardised approach to prototypical inheritance supported by a layer of syntactic sugar built into the language.
+
+The syntax supports inheritance, constructor functions, getters and setters, super functions and static properties.
+
+### Example
+
+```js
+class Shape {
+
+  constructor (numSides) {
+      this.numSides = numSides;
+  }
+
+  get sides () {
+     return this.numSides;
+  }
+
+  describe () {
+    return Shape.label() + ' with ' + this.sides + ' sides';
+  }
+
+  static label () {
+    return 'A shape';
+  }
+}
+
+class Triangle extends Shape {
+
+  constructor () {
+    super(3);
+  }
+
+  describe () {
+    return super.describe() + ', A.K.A. a triangle';
+  }
+}
+
+var triangle = new Triangle();
+console.log(triangle.describe());
+// "A shape with 3 sides, A.K.A. a triangle"
+```

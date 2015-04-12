@@ -1,7 +1,7 @@
 function foo (literals,...substitions) {
     console.log(literals);
     console.log(substitions);
-    return 'Poop';
+    return 'foo';
 }
 
 var name = "Billy";
