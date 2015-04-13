@@ -28,6 +28,7 @@ npm run watch --es6:example=arrow-functions
 - [Modules](#modules)
 - [Template strings](#template-strings)
 - [Classes](#classes)
+- [Objects literal enhancements](#object-literal-enhancements)
 
 ## Arrow function
 
@@ -378,7 +379,7 @@ var message = foo`${name} is ${now()-born} years old`;
 
 ES6 classes provide a standardised approach to prototypical inheritance supported by a layer of syntactic sugar built into the language.
 
-The syntax supports inheritance, constructor functions, getters and setters, super functions and static properties.
+The syntax supports inheritance, a concise method syntax, constructor functions, getters and setters, super functions and static properties.
 
 ### Example
 
@@ -417,3 +418,66 @@ var triangle = new Triangle();
 console.log(triangle.describe());
 // "A shape with 3 sides, A.K.A. a triangle"
 ```
+
+## Objects literal enhancements
+
+### Description
+
+Object literal syntax has received a number of enhancements.
+
+### Examples
+
+#### Property initialiser shorthand
+
+```js
+var foo = 'foo';
+var bar = 'bar';
+
+var o = {foo, bar};
+
+console.log(o); // {foo: 'foo', bar: 'bar'};
+```
+
+> When a new object literal is created and populated with properties of the same name that exist in the current scope then the above shorthand syntax can be used.
+
+#### Method initialiser shorthand
+
+```js
+var o = {
+  foo () {
+    return 'foo';
+  }
+};
+
+console.log(o); // {foo: [Function]};
+```
+
+> Methods can be declared in object literals using the above shorthand. This syntax is shared with the new `class` constructs.
+
+#### Computed property names
+
+```js
+var foo = 'foo';
+
+var o = {
+  [foo]: 'bar',
+  [new Date().getTime()]: 'baz'
+};
+
+console.log(o); // {foo: 'bar', 1428942731913: 'baz'};
+```
+
+> Dynamic property names can be used while creating object literals.
+
+#### Native extending/merging/mixin
+
+```js
+var o1 = {foo: 'foo'};
+var o2 = {bar: 'bar'};
+var o3 = {baz: 'baz', foo: 'qux'};
+
+Object.assign(o1, o2, o3); // {foo: 'qux', bar: 'bar', baz: 'baz'}
+console.log(o1); // {foo: 'qux', bar: 'bar', baz: 'baz'}
+```
+
+> The new `Object.assign` function copies properties and methods from source objects into a target object (the first object in the argument list) and returns the modified object.
