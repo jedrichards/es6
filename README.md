@@ -28,7 +28,8 @@ npm run watch --es6:example=arrow-functions
 - [Modules](#modules)
 - [Template strings](#template-strings)
 - [Classes](#classes)
-- [Objects literal enhancements](#object-literal-enhancements)
+- [Object literal enhancements](#object-literal-enhancements)
+- [Destructuring](#destructuring)
 
 ## Arrow function
 
@@ -419,7 +420,7 @@ console.log(triangle.describe());
 // "A shape with 3 sides, A.K.A. a triangle"
 ```
 
-## Objects literal enhancements
+## Object literal enhancements
 
 ### Description
 
@@ -481,3 +482,53 @@ console.log(o1); // {foo: 'qux', bar: 'bar', baz: 'baz'}
 ```
 
 > The new `Object.assign` function copies properties and methods from source objects into a target object (the first object in the argument list) and returns the modified object.
+
+## Destructuring
+
+### Description
+
+Destructuring, or "object destructuring assignment syntax" describes the new syntax that enables the extraction and declaration of new variables in the local scope from arbitrarily complex data structures.
+
+```js
+var data = {
+  foo: 'foo',
+  bar: 'bar',
+  baz: {
+    qux: 'qux'
+  }
+};
+
+var {foo:newFoo,bar:newBar,baz:{qux:newQux}} = data;
+
+newFoo; // "foo"
+newBar; // "bar"
+newQux; // "qux"
+```
+
+> When destructuring object literal notation syntax is used on the left side of the assignment operation to both describe the target data structure and name the new local variables to be declared.
+
+```js
+var data = ['foo','bar',['baz']];
+
+var [foo,bar,[baz]] = data;
+
+foo; // "foo"
+bar; // "bar"
+baz; // "baz"
+```
+
+> Array literal notation syntax can be freely mixed with object literal notation syntax while destructuring.
+
+```js
+var data = {
+  foo: 'foo',
+  bar: 'bar'
+};
+
+var {foo,bar} = data;
+
+foo; // "foo"
+bar; // "bar"
+```
+
+> A shorthand syntax can be used when the desired local variable names are the same as the object keys in the data to be destructured.
