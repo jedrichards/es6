@@ -30,6 +30,7 @@ npm run watch --es6:example=arrow-functions
 - [Classes](#classes)
 - [Object literal enhancements](#object-literal-enhancements)
 - [Destructuring](#destructuring)
+- [Spread operator and rest parameters](#spread-operator-and-rest-parameters)
 
 ## Arrow function
 
@@ -489,6 +490,10 @@ console.log(o1); // {foo: 'qux', bar: 'bar', baz: 'baz'}
 
 Destructuring, or "object destructuring assignment syntax" describes the new syntax that enables the extraction and declaration of new variables in the local scope from arbitrarily complex data structures.
 
+### Examples
+
+#### Object destructuring
+
 ```js
 var data = {
   foo: 'foo',
@@ -505,19 +510,9 @@ newBar; // "bar"
 newQux; // "qux"
 ```
 
-> When destructuring object literal notation syntax is used on the left side of the assignment operation to both describe the target data structure and name the new local variables to be declared.
+> When destructuring, object literal notation syntax is used on the left side of the assignment operation to both describe the target data structure and name the new local variables to be declared.
 
-```js
-var data = ['foo','bar',['baz']];
-
-var [foo,bar,[baz]] = data;
-
-foo; // "foo"
-bar; // "bar"
-baz; // "baz"
-```
-
-> Array literal notation syntax can be freely mixed with object literal notation syntax while destructuring.
+#### Shorthand syntax
 
 ```js
 var data = {
@@ -531,4 +526,121 @@ foo; // "foo"
 bar; // "bar"
 ```
 
-> A shorthand syntax can be used when the desired local variable names are the same as the object keys in the data to be destructured.
+> A shorthand syntax can be used when the desired local variable names are the same as the object keys in the data.
+
+#### Array destructuring
+
+```js
+var data = ['foo','bar',['baz']];
+
+var [foo,bar,[baz]] = data;
+
+foo; // "foo"
+bar; // "bar"
+baz; // "baz"
+```
+
+> Array literal notation syntax can be freely mixed with object literal notation syntax while destructuring.
+
+#### Parameter destructuring
+
+```js
+function f ({foo,bar}) {
+  console.log(foo);
+  console.log(bar);
+}
+
+f({foo:'foo',bar:'bar'}); // "foo" "bar"
+```
+
+> Destructuring can also be used inline in function parameters.
+
+## Spread operator and rest parameters
+
+### Spread operator
+
+```js
+function f (a,b,c) {
+  console.log(a,b,c);
+};
+
+var values = [1,2,3];
+f(...values); // 1 2 3
+```
+
+> The spread operator `...` is used to unpack an array into its elements in order to be passed into a function as individual arguments.
+
+```js
+function f (a,b,c,d) {
+  console.log(a,b,c,d);
+};
+
+var values = [2,3];
+f(1,...values,4); // 1 2 3 4
+```
+
+> The spread operator can also be mixed and matched with normal function arguments.
+
+### Rest parameters
+
+```js
+function f (first,second,...numbers) {
+  console.log(first,numbers);
+}
+
+f(1,2,3,4,5); // 1 2 [3,4,5]
+```
+
+> Rest parameters, also denoted by `...`, are used to capture all remaining parameters passed to a function and expose them as an array. No other named arguments may follow the rest parameters in the function signature.
+
+## Default parameters
+
+### Description
+
+Default function parameters provide default values for parameters which are not formally passed in. In this way function parameters with defined defaults can be thought of as optional parameters.
+
+### Examples
+
+```js
+function f (a,b=2) {
+  console.log(a,b);
+}
+
+f(1); // 1 2
+```
+
+> Default parameters can be defined anywhere in the parameter set.
+
+```js
+function f (a=1,b=2) {
+  console.log(a,b);
+}
+
+f(undefined,null); // 1 null
+```
+
+> Passing in `undefined` will cause the default value to be used. Passing in `null` however will not cause the default value to be used.
+
+```js
+function f (callback=() => {}) {
+  console.log(callback);
+}
+
+f(); // [Function]
+```
+
+> The value of the default parameter need not be a primitive, it can for example be a function.
+
+```js
+function getCallback () {
+  return () => {};
+}
+
+function f (callback=getCallback()) {
+  console.log(callback);
+}
+
+f(); // [Function]
+```
+
+> The default value may even be the result of calling a function.
