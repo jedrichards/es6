@@ -31,6 +31,7 @@ npm run watch --es6:example=arrow-functions
 - [Object literal enhancements](#object-literal-enhancements)
 - [Destructuring](#destructuring)
 - [Spread operator and rest parameters](#spread-operator-and-rest-parameters)
+- [Symbols](#symbols)
 
 ## Arrow function
 
@@ -471,7 +472,7 @@ console.log(o); // {foo: 'bar', 1428942731913: 'baz'};
 
 > Dynamic property names can be used while creating object literals.
 
-#### Native extending/merging/mixin
+#### Native object merging
 
 ```js
 var o1 = {foo: 'foo'};
@@ -483,6 +484,19 @@ console.log(o1); // {foo: 'qux', bar: 'bar', baz: 'baz'}
 ```
 
 > The new `Object.assign` function copies properties and methods from source objects into a target object (the first object in the argument list) and returns the modified object.
+
+
+#### Method Shorthand
+
+```js
+var o = {
+  f () {}
+}
+
+o.f; // [Function]
+```
+
+> The same shorthand syntax used to declare methods in the new `class` construct can be used to declare methods in object literals.
 
 ## Destructuring
 
@@ -585,7 +599,7 @@ f(1,...values,4); // 1 2 3 4
 
 ```js
 function f (first,second,...numbers) {
-  console.log(first,numbers);
+  console.log(first,second,numbers);
 }
 
 f(1,2,3,4,5); // 1 2 [3,4,5]
@@ -644,3 +658,52 @@ f(); // [Function]
 ```
 
 > The default value may even be the result of calling a function.
+
+## Symbols
+
+### Description
+
+Symbols are a new primitive type in ES6 and enable non-string values for computed property identifiers. Originally drafted as a mechanism to create strictly private object members, they have since lost that trait and now simply define non-string computed property identifiers that are non-enumerable but discoverable.
+
+When referring to specific symbols outside of code the "@@" notation is used. For example, we might refer to the symbol in the first example below as the @@firstName symbol.
+
+### Examples
+
+```js
+var firstName = Symbol('firstName');
+console.log(firstName); // "Symbol(firstName)"
+```
+
+> Symbols are created with the `Symbol` function. Each new symbol value is unique. The argument passed to `Symbol()` is the symbol's description. It is good practice to always give a symbol a description to aid with debugging.
+
+```js
+const PRIVATE_VALUE = Symbol('privateValue');
+
+class Foo {
+  constructor () {
+    this.publicValue = 'bar';
+    this[PRIVATE_VALUE] = 'baz';
+  }
+}
+```
+
+> Symbols can be used as computed property identifiers in objects and classes. The related value is therefore somewhat private to code that does not have a reference to the symbol itself, for example code in other modules. The value is not strictly private however since the symbol and its value are still enumerable via reflection APIs.
+
+```js
+const COLOR_RED = Symbol('colorRed');
+const COLOR_GREEN = Symbol('colorGreen');
+const COLOR_BLUE = Symbol('colorBlue');
+```
+
+> Symbols can be a better choice than strings for the values of constants, since they are guaranteed unique.
+
+```js
+var it = [1,2,3][Symbol.iterator]();
+
+console.log(it.next()); // {value:1,done:false}
+console.log(it.next()); // {value:2,done:false}
+console.log(it.next()); // {value:3,done:false}
+console.log(it.next()); // {value:undefined,done:true}
+```
+
+> Symbols are used by native features of the language to define meta-properties. For example the @@iterator symbol which by convention defines a function which when invoked returns a standard iterator for any compatible object (objects, arrays, strings, maps, sets or user defined).
