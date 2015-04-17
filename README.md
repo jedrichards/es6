@@ -32,6 +32,8 @@ npm run watch --es6:example=arrow-functions
 - [Destructuring](#destructuring)
 - [Spread operator and rest parameters](#spread-operator-and-rest-parameters)
 - [Symbols](#symbols)
+- [Iterators](#iterators)
+- [Generators](#generators)
 
 ## Arrow function
 
@@ -110,7 +112,7 @@ The `let` keyword declares a variable that is strictly scoped to the current blo
 
 Examples of blocks that `let` declarations are scoped to include `if` statements, `for` loops and naked `{}` blocks.
 
-In general `let` may be used in place of `var` in most scenarios, with the benefit of tightening up the code with a more focussed piece of syntax. The phrase "`let` is the new `var`" is false however, since there will remain many instances where the more liberal scoping of `var` is the correct choice.
+In general `let` may be used in place of `var` in most scenarios, with the benefit of tightening up the code with a more focussed piece of syntax. There will remain many instances where the more liberal scoping of `var` is the correct choice however.
 
 ### Examples
 
@@ -556,6 +558,39 @@ baz; // "baz"
 
 > Array literal notation syntax can be freely mixed with object literal notation syntax while destructuring.
 
+#### Iterator destructuring
+
+```js
+var set = new Set().add('a').add('b').add('c');
+
+var [x,y,z] = set;
+console.log(x,y,z); // a b c
+```
+
+> Array literals can be used to destructure any iterable object.
+
+#### Loop destructuring
+
+```js
+let map = new Map();
+map.set('a',1);
+map.set('b',2);
+
+for (let [k,v] of map) {
+  console.log(`key = ${k}, value = ${v}`);
+}
+```
+
+#### Spread destructuring
+
+```js
+var array = [1,2,3,4];
+var [first,...theRest] = array;
+console.log(first,theRest); // 1 [2,3,4]
+```
+
+> The spread operator `...` can also be used when destructuring arrays and other iterable objects.
+
 #### Parameter destructuring
 
 ```js
@@ -678,11 +713,16 @@ console.log(firstName); // "Symbol(firstName)"
 
 ```js
 const PRIVATE_VALUE = Symbol('privateValue');
+const PRIVATE_METHOD = Symbol('privateMethod');
 
 class Foo {
+
   constructor () {
     this.publicValue = 'bar';
     this[PRIVATE_VALUE] = 'baz';
+  }
+
+  [PRIVATE_METHOD] () {
   }
 }
 ```
@@ -697,13 +737,301 @@ const COLOR_BLUE = Symbol('colorBlue');
 
 > Symbols can be a better choice than strings for the values of constants, since they are guaranteed unique.
 
-```js
-var it = [1,2,3][Symbol.iterator]();
+## Iterators
 
-console.log(it.next()); // {value:1,done:false}
-console.log(it.next()); // {value:2,done:false}
-console.log(it.next()); // {value:3,done:false}
-console.log(it.next()); // {value:undefined,done:true}
+### Description
+
+In ES6 objects are said to be iterable when they implement the *iterable* interface. Many built-in objects such as arrays, sets and maps implement this interface. User defined objects and classes can also implement the interface.
+
+Iterable objects can be iterated using the new `for of` loop, and used with the `...` spread operator.
+
+### Examples
+
+#### Iterable interface
+
+```js
+var iterator = [1,2,3][Symbol.iterator]();
 ```
 
-> Symbols are used by native features of the language to define meta-properties. For example the @@iterator symbol which by convention defines a function which when invoked returns a standard iterator for any compatible object (objects, arrays, strings, maps, sets or user defined).
+> An object is said to conform to the iterable interface when the value of its property identified with the @@iterator shared symbol key is a function which returns an iterator.
+
+```js
+var iterator = [1,2,3][Symbol.iterator]();
+
+console.log(iterator.next); // "[Function]"
+```
+
+> An iterator is an object that implements a `next` function.
+
+```js
+var iterator = [1,2,3][Symbol.iterator]();
+
+console.log(iterator.next()); // {value:1, done:false}
+console.log(iterator.next()); // {value:2, done:false}
+console.log(iterator.next()); // {value:3, done:false}
+console.log(iterator.next()); // {value:undefined, done:true}
+```
+
+> The `next` function can be called repeatedly to step through the iteration. Each time it returns an object that contains two keys, `value` and `done` which indicate the current value of the iteration and its completion status respectively.
+
+```js
+var iterable = {
+  [Symbol.iterator] () {
+    return {
+      next () {
+        // Implement iterator
+      }
+    }
+  }
+}
+```
+
+> Custom objects and classes can be made iterable by implementing the iterator interface manually.
+
+#### `for of` loop
+
+```js
+for ( let n of [1,2,3] ) {
+  console.log(n);
+}
+// 1
+// 2
+// 3
+```
+
+> The new `for of` loop is designed to work exclusively with iterable objects. The loop calls the `next` function behind the scenes and exits when the `done` property is `true`.
+
+```js
+var map = new Map();
+map.set('a', 1);
+map.set('b', 2);
+
+for (let pair of map) {
+  console.log(pair);
+}
+// [a,1]
+// [b,2]
+```
+
+> As long as the object implements the iterable interface it can be looped with the `for of` loop, this includes maps and sets.
+
+```js
+var map = new Map();
+map.set('a', 1);
+map.set('b', 2);
+
+for (let key of map.keys()) {
+  console.log(key);
+}
+// a
+// b
+```
+
+> Arrays, sets and maps also expose the `entries`, `keys` and `values` functions for returning specialised iterators. The `keys` iterator loops over only the keys, the `values` iterator only the values, and the `entries` iterator the key/value pairs.
+
+```js
+for (let char of "foo") {
+  console.log(char);
+}
+// "f"
+// "o"
+// "o"
+```
+
+> In ES6 strings also implement the iterable interface.
+
+## Generators
+
+### Description
+
+Generators are a type of function that can be paused and resumed. When a generator is created using the `function *` syntax a specialised iterator instance is returned that can be used to variously control the generator, consume its output or feed it new input.
+
+Each `yield` expression encountered inside the generator passes a `value` out into the iteration. Generators are initially paused at the very beginning of their function body, and can only be advanced through each successive internal `yield` expression by calling `next` on the generator's iterator each time.
+
+The iterator's `next` method can also be used to pass values into the generator which manifest inside the function body as the value of the `yield` expression at which the runtime is currently paused.
+
+### Examples
+
+#### Creating iterators
+
+```js
+function * makeGenerator () {
+  yield 1;
+  yield 2;
+  yield 3;
+}
+
+var it = makeGenerator();
+
+for (let i of it) {
+    console.log(i);
+}
+// 1, 2, 3
+
+var array = [...makeGenerator()];
+console.log(array); // [1,2,3]
+```
+
+> At their simplest, generators provide a shorthand for easily creating custom iterable objects. Generator derived iterables can be used in all the same ways as standard iterables, i.e. with the `for of` loop and the `...` spread operator.
+
+```js
+function * makeGenerator (items) {
+  for (let i=0; i < items.length; i++) {
+    yield items[i];
+  }
+}
+
+var it = makeGenerator([1,2,3]);
+
+for (let i of it) {
+    console.log(i);
+}
+// 1
+// 2
+// 3
+```
+
+> `yield` doesn't need to be called explicitly line by line, it can be called repeatedly in a loop to generate a dynamic sequence of values.
+
+```js
+function * makeGenerator () {
+  yield 1;
+  return 2;
+  yield 3;
+}
+
+var it = makeGenerator();
+
+console.log(it.next()); // {value:1, done:false}
+console.log(it.next()); // {value:2, done:true}
+console.log(it.next()); // {value:undefined, done:true}
+
+```
+
+> A `return` statement can be used in a generator function body to terminate the iteration and indicate a final `value` emitted together with `done:true`. :warning: Be careful when using `return` in a generator; a `for in` loop will discard the final returned value and not loop over it since at that point `done:true`.
+
+```js
+var o = {
+  * makeGenerator () {}
+}
+
+var it = o.makeGenerator();
+
+console.log(it.next); // "Function"
+```
+
+> Generators can be defined in objects and classes using the shorthand method syntax.
+
+```js
+function * makeGenerator () {
+  [1,2].forEach(x => yield x); // Bang!
+}
+```
+
+> A `yield` expression can only be used directly inside the body of a generator function, if you try to use it within a non-generator function body the code will explode.
+
+#### Pausing and resuming
+
+```js
+function * makeGenerator () {
+  console.log('Hello');
+  yield 1;
+  console.log('World');
+}
+
+var it = makeGenerator();
+var result = it.next(); // "Hello"
+console.log(result); // {value:1, done:false}
+result = it.next(); // "World"
+console.log(result); // {value:undefined, done:true}
+```
+
+> An important feature of generator derived iterables is that they are initially paused at the very start of their function body. Calling `next` will cause the runtime to advance to the next `yield` expression and pause again. This trait enables generator-based flow-control libraries like [tj/co](https://github.com/tj/co) which provide a sync-like syntax for async code.
+
+#### Error handling
+
+Error handling in generators is somewhat simple since it can be handled normally via `throw` and `try ... catch`.
+
+```js
+function * makeGenerator () {
+  yield 1;
+  console.log('Hi mum!');
+}
+
+var it = makeGenerator();
+
+it.next(); // {value:1, done:false}
+it.throw('Poop!') // Uncaught Error: Poop!
+```
+
+> Generator iterators expose a method `throw` which can be used to raise an error inside the generator at the `yield` expression at which it is currently paused. The string "Hi mum!" in the above example will therefore never be logged.
+
+#### Generator I/O
+
+```js
+function * makeGenerator (x) {
+    var y = 2 * (yield (x + 3));
+    var z = yield (y / 2);
+    return (x + y + z);
+}
+
+var it = makeGenerator(2);
+
+console.log(it.next()); // {value:5, done:false}
+console.log(it.next(4)); // {value:4, done:false}
+console.log(it.next(3)); // {value:13, done:true}
+```
+
+> `yield` passes data out of the generator into the iterator, but the iterator's `next` method can be used to pass data in the other direction, that is, into the generator. The value passed in via `next` becomes the value of the `yield` expression at which the generator is currently paused. Note that no value is passed in with the very first call to `next`, this is because although the generator is paused, it is not paused at a `yield` so therefore any value passed via `next` here is discarded.
+
+#### Nested iterators
+
+```js
+function * makeGenerator () {
+  yield 1;
+  yield * [2,3];
+  yield 4;
+}
+
+var array = [...makeGenerator()];
+console.log(array); // [1,2,3,4]
+```
+
+> The `yeild *` syntax can be used to nest iterables arbitrarily deeply. By using `yield *` we are delegating the iteration to a child iterable which will output all its values into the loop until they are exhausted at which point control is handed back to the parent generator. In this way iterators can be composed together and reused.
+
+```js
+class Foo {
+
+  items: [],
+
+  * [Symbol.iterator] () {
+    yield * this.items.values();
+  }
+}
+```
+
+> Here we're giving the `Foo` class a default iterator which loops over its items, and implementing it using a generator function which delegates to the built-in `values` iterator of `Array`.
+
+```js
+function * generatorB(i) {
+  yield i + 1;
+  yield i + 2;
+  yield i + 3;
+}
+
+function * generatorA(i) {
+  yield i;
+  yield * generatorB(i);
+  yield i + 10;
+}
+
+var it = generatorA(10);
+
+console.log(gen.next().value); // 10
+console.log(gen.next().value); // 11
+console.log(gen.next().value); // 12
+console.log(gen.next().value); // 13
+console.log(gen.next().value); // 20
+```
+
+> `yeild *` can be used to nest any sort of iterable, including those derived from generators.

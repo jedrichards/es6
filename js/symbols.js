@@ -9,10 +9,3 @@ var o = {
 };
 
 console.log(o[firstName]());
-
-var it = [1,2,3][Symbol.iterator]();
-
-console.log(it.next());
-console.log(it.next());
-console.log(it.next());
-console.log(it.next());
