@@ -2,6 +2,10 @@
 
 > ES6 feature documentation and examples
 
+## Live examples
+
+You can run the Babel.js powered examples in this repo via npm scripts.
+
 Run all the examples,
 
 ```sh
@@ -20,6 +24,15 @@ Watch an example and re-run when it changes,
 npm run watch --es6:example=arrow-functions
 ```
 
+## Resources
+
+The following resources were used to compile this document:
+
+- [②ality](http://www.2ality.com)
+- [Understanding ECMAScript 6](https://leanpub.com/understandinges6/read)
+- [davidwalsh.name](http://davidwalsh.name)
+- [lukehoban/es6features](https://github.com/lukehoban/es6features)
+
 ## Features
 
 - [Arrow function](#arrow-function)
@@ -34,6 +47,8 @@ npm run watch --es6:example=arrow-functions
 - [Symbols](#symbols)
 - [Iterators](#iterators)
 - [Generators](#generators)
+- [Map](#map)
+- [Set](#set)
 
 ## Arrow function
 
@@ -450,7 +465,6 @@ console.log(o); // {foo: 'foo', bar: 'bar'};
 ```js
 var o = {
   foo () {
-    return 'foo';
   }
 };
 
@@ -486,19 +500,6 @@ console.log(o1); // {foo: 'qux', bar: 'bar', baz: 'baz'}
 ```
 
 > The new `Object.assign` function copies properties and methods from source objects into a target object (the first object in the argument list) and returns the modified object.
-
-
-#### Method Shorthand
-
-```js
-var o = {
-  f () {}
-}
-
-o.f; // [Function]
-```
-
-> The same shorthand syntax used to declare methods in the new `class` construct can be used to declare methods in object literals.
 
 ## Destructuring
 
@@ -984,7 +985,7 @@ console.log(it.next(3)); // {value:13, done:true}
 
 > `yield` passes data out of the generator into the iterator, but the iterator's `next` method can be used to pass data in the other direction, that is, into the generator. The value passed in via `next` becomes the value of the `yield` expression at which the generator is currently paused. Note that no value is passed in with the very first call to `next`, this is because although the generator is paused, it is not paused at a `yield` so therefore any value passed via `next` here is discarded.
 
-#### Nested iterators
+#### Nesting iterators
 
 ```js
 function * makeGenerator () {
@@ -1035,3 +1036,125 @@ console.log(gen.next().value); // 20
 ```
 
 > `yeild *` can be used to nest any sort of iterable, including those derived from generators.
+
+## Map
+
+### Description
+
+`Map` is a new data structure in ES6. It can be used to map values to values. Previously in ES5 this was only possible by mapping strings to values using native objects.
+
+#### API
+
+| Method  | Description |
+| ------- | ----------- |
+| `get(key)` | Returns the value for the specifief `key` |
+| `set(key,value)` | Set or update the `value` at `key`  |
+| `has(key)` | Whether `key` exists in the map |
+| `delete(key)` | Remove entry for `key` |
+| `clear()` | Remove all entries |
+| `entries()` | Returns an iterable in the format `[key,value]` (default) |
+| `keys()` | Returns an iterable in the format `key` |
+| `values()` | Returns an iterable in the format `value` |
+| `forEach(f)` | Functional iteration |
+
+### Examples
+
+#### Keys
+
+```js
+var key1 = {};
+var key2 = 'a';
+var key3 = true;
+var key4 = () => {};
+
+var map = new Map();
+map.set(key1, 'foo');
+map.set(key2, 'bar');
+map.set(key3, 'baz');
+map.set(key4, 'qux');
+
+map.get(key1); // "foo"
+map.get(key2); // "bar"
+map.get(key3); // "baz"
+map.get(key4); // "qux"
+```
+
+> Any value can be a key, even an object or function
+
+#### Bulk initialisation
+
+```js
+var map = new Map([
+  [1,'foo'],
+  [2,'bar'],
+  [3,'baz']
+]);
+```
+
+> `Map` can be initialised with an array of key/value pairs.
+
+#### Iteration
+
+```js
+for ( let entry of map ) {
+  console.log(entry); // [key,value]
+}
+
+for ( let key of map.entries() ) {
+  console.log(entry); // [key,value]
+}
+
+for ( let key of map.keys() ) {
+  console.log(key); // key
+}
+```
+
+> `Map` can be iterated using the new `for of` loop. Its default iterator is same as that returned by `entries()`.
+
+```js
+for ( let [key,value] of map) {
+  console.log(key,value);
+}
+```
+
+> You can destructure during the iteration to gain concise access to the `key` and `value` variables.
+
+```js
+var map = new Map([
+  [1,'foo'],
+  [2,'bar'],
+  [3,'baz']
+]);
+
+var values = [...map.values()];
+console.log(values); // "foo", "bar", "baz"
+```
+
+> The iterators of `Map` can be used to convert the data structure into an array using the `...` spread operator.
+
+```js
+var map1 = new Map([
+  [1,'a'],
+  [2,'b'],
+  [3,'c'],
+  [4,'d']
+]);
+
+var map2 = new Map(
+  [...map1]
+  .filter(([key,value]) => key > 2)
+  .map(([key,value]) => [key * 2, value])
+);
+
+console.log(map2); // {6:"c", 8:"d"}
+```
+
+> The concise conversion between `Map` and `Array` can be used to leverage array's `filter()` and `map()` functions on the underlying data structure.
+
+```js
+var map = new WeakMap();
+
+map.set(document.querySelector('.Foo'), 'foo');
+```
+
+> `WeakMap` does not prevent its keys from being garbage collected. This makes `WeakMap` suitable for storing key/value pairs where the key may disappear sometime in the future. In the above example once the DOM node has been removed from the DOM, as long as there are no other references anywhere, it is free to be garbage collected and at which point it was also disappear from the `WeakMap`. `WeakMap` is not iterable and does not have a `clear()` method, but aside from these differences its API is the same as `Map`.
