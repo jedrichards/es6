@@ -1041,21 +1041,21 @@ console.log(gen.next().value); // 20
 
 ### Description
 
-`Map` is a new data structure in ES6. It can be used to map values to values. Previously in ES5 this was only possible by mapping strings to values using native objects.
+`Map` is a new iterable data structure in ES6. It can be used to map values to values. Previously in ES5 this was usually achieved by (ab)using native objects and mapping strings to values.
 
 #### API
 
-| Method  | Description |
-| ------- | ----------- |
-| `get(key)` | Returns the value for the specifief `key` |
-| `set(key,value)` | Set or update the `value` at `key`  |
-| `has(key)` | Whether `key` exists in the map |
-| `delete(key)` | Remove entry for `key` |
-| `clear()` | Remove all entries |
-| `entries()` | Returns an iterable in the format `[key,value]` (default) |
-| `keys()` | Returns an iterable in the format `key` |
-| `values()` | Returns an iterable in the format `value` |
-| `forEach(f)` | Functional iteration |
+| Method           | Description                                               |
+| ---------------- | --------------------------------------------------------- |
+| `get(key)`       | Returns the value for the specified `key`                 |
+| `set(key,value)` | Set or update the `value` at `key`                        |
+| `has(key)`       | Whether `key` exists in the map                           |
+| `delete(key)`    | Remove entry for `key`                                    |
+| `clear()`        | Remove all entries                                        |
+| `entries()`      | Returns an iterable in the format `[key,value]` (default) |
+| `keys()`         | Returns an iterable in the format `key`                   |
+| `values()`       | Returns an iterable in the format `value`                 |
+| `forEach(f)`     | Functional iteration                                      |
 
 ### Examples
 
@@ -1079,7 +1079,7 @@ map.get(key3); // "baz"
 map.get(key4); // "qux"
 ```
 
-> Any value can be a key, even an object or function
+> Any value can be a key, even an object or a function.
 
 #### Bulk initialisation
 
@@ -1092,6 +1092,35 @@ var map = new Map([
 ```
 
 > `Map` can be initialised with an array of key/value pairs.
+
+#### Size
+
+```js
+var map = new Map([
+  [1,'foo'],
+  [2,'bar'],
+  [3,'baz']
+]);
+
+console.log(map.size); // 3
+```
+
+> The `size` getter returns the number of entries in the map.
+
+#### Deleting entries
+
+```js
+var map = new Map([
+  [1,'foo'],
+  [2,'bar'],
+  [3,'baz']
+]);
+
+console.log(map.delete(1)); // true
+console.log(map.delete(4)); // false
+```
+
+> Entries can be removed from the map by calling the `delete()` method. The return value indicates whether the specified key was present in the map to begin with.
 
 #### Iteration
 
@@ -1118,6 +1147,8 @@ for ( let [key,value] of map) {
 ```
 
 > You can destructure during the iteration to gain concise access to the `key` and `value` variables.
+
+#### Conversion to `Array`
 
 ```js
 var map = new Map([
@@ -1149,7 +1180,9 @@ var map2 = new Map(
 console.log(map2); // {6:"c", 8:"d"}
 ```
 
-> The concise conversion between `Map` and `Array` can be used to leverage array's `filter()` and `map()` functions on the underlying data structure.
+> The concise conversion between `Map` and `Array` can be used to leverage array's `filter()` and `map()` functions to process the underlying data structure.
+
+#### `WeakMap`
 
 ```js
 var map = new WeakMap();
@@ -1157,4 +1190,94 @@ var map = new WeakMap();
 map.set(document.querySelector('.Foo'), 'foo');
 ```
 
-> `WeakMap` does not prevent its keys from being garbage collected. This makes `WeakMap` suitable for storing key/value pairs where the key may disappear sometime in the future. In the above example once the DOM node has been removed from the DOM, as long as there are no other references anywhere, it is free to be garbage collected and at which point it was also disappear from the `WeakMap`. `WeakMap` is not iterable and does not have a `clear()` method, but aside from these differences its API is the same as `Map`.
+> `WeakMap` does not prevent its keys from being garbage collected. This makes `WeakMap` suitable for storing key/value pairs where the key may disappear sometime in the future. In the above example, once the `.Foo` element has been removed from the DOM, as long as there are no other references anywhere, it is free to be garbage collected and at which point it was also disappear from the `WeakMap`. Because of the way the weak references are stored in `WeakMap` it is not iterable, does not have a `clear()` method and cannot contain primitive values only object references, but aside from these differences its API is the same as `Map`.
+
+## Set
+
+### Description
+
+`Set` is a new iterable data structure in ES6 designed to store unique values. Unlike `Array` where elements are stored at retrieved at specific positions, one typically tests values for membership in the `Set`.
+
+#### API
+
+| Method          | Description                                         |
+| --------------- | --------------------------------------------------- |
+| `add(value)`    | Adds a value to the set                             |
+| `has(value)`    | Whether a value exists in the set                   |
+| `delete(value)` | Remove value from the set                           |
+| `clear()`       | Remove all values                                   |
+| `values()`      | Returns an iterable in the format `value` (default) |
+| `forEach(f)`    | Functional iteration                                |
+
+### Examples
+
+#### Adding values
+
+```js
+var set = new Set();
+
+set.add({});
+set.add({});
+set.add(1);
+set.add('foo');
+
+console.log(set.size); // 4
+```
+
+> A `Set` can contain primitive values and object references. Each new, unique value or reference counts towards the size of the set.
+
+```js
+var set = new Set();
+
+set.add(1);
+set.add(1);
+
+console.log(set.size); // 1
+```
+
+> Adding duplicate values has no effect.
+
+#### Bulk initialisation
+
+```js
+var set = new Set(['red','green','blue','blue']);
+
+console.log(set.size); // 3
+```
+
+> `Set` can be initialised using an array as a data source while removing duplicate values.
+
+#### Iteration
+
+```js
+var set = new Set(['red','green','blue']);
+
+for (let value of set) {
+  console.log(value);
+}
+```
+
+> `Set` is iterable so can therefore be iterated using the new `for of` loop. The order of iteration is the same as the order of insertion into the set.
+
+#### Conversion to `Array`
+
+```js
+var set = new Set([1,2,3]);
+var array = [...set];
+
+array.push(3);
+
+console.log(array); // 1,2,3,3
+console.log([...new Set(array)]); // 1,2,3
+```
+
+> Since `Set` is both iterable and can be initialised by an array, conversion to and from an array is straightforward using the `...` spread operator. Duplicate values will be pruned from the array during its conversion to a set.
+
+```js
+var set1 = new Set([1,2,3,4,5]);
+var set2 = new Set([...set].filter(x => x > 2));
+
+console.log(set2); // {3,4,5}
+```
+
+> Array conversion and initialisation can be used to access array's `filter()` and `map()` methods.
