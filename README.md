@@ -49,6 +49,7 @@ The following resources were used to compile this document:
 - [Generators](#generators)
 - [Map](#map)
 - [Set](#set)
+- [Promise](#promise)
 
 ## Arrow function
 
@@ -845,7 +846,9 @@ for (let char of "foo") {
 
 ### Description
 
-Generators are a type of function that can be paused and resumed. When a generator is created using the `function *` syntax a specialised iterator instance is returned that can be used to variously control the generator, consume its output or feed it new input.
+Generators are a type of function that can be paused and resumed, and are primarily used for lazy evaluation of sequences. They can also be used to clean up the syntax of sequences of async tasks.
+
+When a generator is created using the `function *` syntax a specialised iterator instance is returned that can be used to variously control the generator, consume its output or feed it new input.
 
 Each `yield` expression encountered inside the generator passes a `value` out into the iteration. Generators are initially paused at the very beginning of their function body, and can only be advanced through each successive internal `yield` expression by calling `next` on the generator's iterator each time.
 
@@ -947,7 +950,7 @@ result = it.next(); // "World"
 console.log(result); // {value:undefined, done:true}
 ```
 
-> An important feature of generator derived iterables is that they are initially paused at the very start of their function body. Calling `next` will cause the runtime to advance to the next `yield` expression and pause again. This trait enables generator-based flow-control libraries like [tj/co](https://github.com/tj/co) which provide a sync-like syntax for async code.
+> An important feature of generator derived iterables is that they are initially paused at the very start of their function body. Calling `next` will cause the runtime to advance to the next `yield` expression and pause again.
 
 #### Error handling
 
@@ -1045,17 +1048,17 @@ console.log(gen.next().value); // 20
 
 #### API
 
-| Method           | Description                                               |
-| ---------------- | --------------------------------------------------------- |
-| `get(key)`       | Returns the value for the specified `key`                 |
-| `set(key,value)` | Set or update the `value` at `key`                        |
-| `has(key)`       | Whether `key` exists in the map                           |
-| `delete(key)`    | Remove entry for `key`                                    |
-| `clear()`        | Remove all entries                                        |
-| `entries()`      | Returns an iterable in the format `[key,value]` (default) |
-| `keys()`         | Returns an iterable in the format `key`                   |
-| `values()`       | Returns an iterable in the format `value`                 |
-| `forEach(f)`     | Functional iteration                                      |
+| Method           | Description                                                |
+| ---------------- | ---------------------------------------------------------- |
+| `get(key)`       | Returns the value for the specified `key`                  |
+| `set(key,value)` | Set or update the `value` at `key`                         |
+| `has(key)`       | Whether `key` exists in the map                            |
+| `delete(key)`    | Remove entry for `key`                                     |
+| `clear()`        | Remove all entries                                         |
+| `entries()`      | Returns an iterable which iterates `[key,value]` (default) |
+| `keys()`         | Returns an iterable which iterates `key`                   |
+| `values()`       | Returns an iterable which iterates `value`                 |
+| `forEach(f)`     | Functional iteration                                       |
 
 ### Examples
 
@@ -1196,18 +1199,18 @@ map.set(document.querySelector('.Foo'), 'foo');
 
 ### Description
 
-`Set` is a new iterable data structure in ES6 designed to store unique values. Unlike `Array` where elements are stored at retrieved at specific positions, one typically tests values for membership in the `Set`.
+`Set` is a new iterable data structure in ES6 designed to store unique values. Unlike arrays where elements are stored at specific indices one typically simply tests values for membership in a set.
 
 #### API
 
-| Method          | Description                                         |
-| --------------- | --------------------------------------------------- |
-| `add(value)`    | Adds a value to the set                             |
-| `has(value)`    | Whether a value exists in the set                   |
-| `delete(value)` | Remove value from the set                           |
-| `clear()`       | Remove all values                                   |
-| `values()`      | Returns an iterable in the format `value` (default) |
-| `forEach(f)`    | Functional iteration                                |
+| Method          | Description                                          |
+| --------------- | ---------------------------------------------------- |
+| `add(value)`    | Adds a value to the set                              |
+| `has(value)`    | Whether a value exists in the set                    |
+| `delete(value)` | Remove value from the set                            |
+| `clear()`       | Remove all values                                    |
+| `values()`      | Returns an iterable which iterates `value` (default) |
+| `forEach(f)`    | Functional iteration                                 |
 
 ### Examples
 
@@ -1281,3 +1284,210 @@ console.log(set2); // {3,4,5}
 ```
 
 > Array conversion and initialisation can be used to access array's `filter()` and `map()` methods.
+
+## Promise
+
+### Description
+
+A promise is an object that represents the result of an async operation. ES6 has a built-in promise implementation that conforms to the Promise/A+ spec.
+
+A promise may be in one of the following three mutually exclusive states, `pending|fulfilled|rejected`.
+
+Resolving a promise means a state change from `pending -> fulfilled`. The promise may resolve with a value, that is, the result of the async operation.
+
+Rejecting a promise means a state change from `pending -> rejected`. The promise may reject with an error, which is often an instance of `Error`.
+
+When a promise is either `fulfilled` or `rejected` it is said to be "settled".
+
+Code can react to a promise's state change by registering callbacks via its `then()` and `catch()` methods.
+
+> The ES6 promise implementation lacks some of the API provided by other promise libraries, such as `done()` and `finally()` methods amoungst others. Consider using a mature promise library such as [Bluebird](https://github.com/petkaantonov/bluebird) if these additional features are important.
+
+### Examples
+
+#### Consuming promises
+
+```js
+promise.then(
+  value => {},
+  error => {}
+);
+```
+
+> A promise's `then()` method can register two callbacks to handle fulfillment or rejection.
+
+```js
+promise
+  .then(value => {})
+  .catch(error => {});
+```
+
+> Alternatively use the `then()` and `catch()` methods to handle each callback explicitly. This is the preferred form since it signals intent more clearly.
+
+#### Producing promises
+
+```js
+var promise = new Promise((resolve,reject) => {
+  resolve('yay!');
+  // Or,
+  // reject(new Error('Poop!'));
+});
+
+promise
+  .then(value => console.log('success',value))
+  .catch(error => console.log('fail',error));
+
+// "success yay!"
+```
+
+> A promise can be instantiated and then resolved or rejected within a callback passed to its constructor.
+
+```js
+var promise = Promise.resolve().then(function () {
+  // return Promise.resolve('yay!');
+  // Or,
+  return Promise.reject(new Error('Poop!'));
+});
+
+promise
+  .then(value => console.log('success',value))
+  .catch(error => console.log('fail',error));
+
+// "fail [Error: Poop!]"
+```
+
+> A more concise and efficient approach is to leverage the static methods `Promise.resolve()` and `Promise.reject()` which return an immediately resolved or rejected promise directly.
+
+#### Chaining promises
+
+```js
+Promise.resolve()
+  .then(() => 'foo')
+  .then(value => console.log(value));
+
+// "foo"
+```
+
+> Any value returned in a fulfillment callback is appended onto the promise chain. When returning a primitive value it is wrapped in a promise and immediately resolved.
+
+```js
+Promise.resolve()
+  .then(() => Promise.resolve('foo'))
+  .then(value => console.log(value));
+
+// "foo"
+```
+
+> So-called "thenable" objects, i.e. other promises, can also be returned from a fulfillment callback. In which case the chain will wait for the promise to settle and then propagate its fulfilled or rejected state into the chain.
+
+```js
+function asyncThing (value) {
+  return Promise.resolve(value);
+}
+
+Promise.resolve('foo')
+  .then(asyncThing)
+  .then(value => console.log(value));
+
+// "foo"
+```
+
+> When chaining async methods that take a single argument and return a promise they can be directly and concisely inserted into the `then` chain by reference without the need to wrap them in an anonymous callback function.
+
+#### Error handling
+
+```js
+var promise = new Promise((resolve,reject) => {
+  throw(new Error('Poop!'));
+});
+
+promise
+  .then(value => console.log(value))
+  .catch(error => console.log(error));
+
+// "[Error: Poop!]"
+```
+
+> Any errors thrown by code in the promise setup function passed to its constructor will propagate into the promise chain and surface in the first rejection callback.
+
+```js
+var promise = lib.getPromise();
+
+promise
+  .then(() => {
+    throw(new Error('Poop!'));
+  })
+  .then(lib.getAnotherPromise)
+  .then(lib.getYetAnotherPromise)
+  .catch(error => console.log(error));
+```
+
+> Any errors thrown in a fulfillment callback will also raise an error in the chain. Errors drop through additional chained fulfillment callbacks until they reach a rejection callback. Be careful since if there are no rejection callbacks registered on the promise the error will be silently swallowed.
+
+```js
+var promise = lib.getPromise();
+
+promise
+  .then(lib.getAnotherPromise)
+  .then(lib.getYetAnotherPromise)
+  .catch(error => error)
+  .then(value => console.log('Everything is fine, but there was an error',value));
+```
+
+> If an error is caught in a rejection callback but that callback doesn't raise a new error then that error is deemed recoverable and the chain continues in a non-error state.
+
+#### Promise composition
+
+```js
+var promises = ['foo','bar','baz'].map(value => {
+  return Promise.resolve(value);
+});
+
+Promise.all(promises)
+  .then(values => console.log(values))
+  .catch(error => console.log(error));
+
+// ['foo','bar','baz']
+```
+
+> The `Promise.all` method takes an array of promises and returns a single promise that fulfills with an array containing the values of each the supplied promises.
+
+```js
+function delay (delay) {
+  return new Promise((resolve,reject) => {
+    setTimeout(() => {
+      resolve(delay);
+    },delay)
+  });
+}
+
+Promise
+  .race([delay(100),delay(200)])
+  .then(value => console.log(value));
+
+// 100
+```
+
+> The `Promise.race` method takes an array of promises and returns a single promise that fulfills with the value of the first promise of the supplied promises to fulfill.
+
+#### Promises and generators
+
+```js
+
+function asyncThing (value) {
+  return Promise.resolve(value);
+}
+
+var promise = co(function * () {
+  var a = yield asyncThing('foo');
+  var b = yield asyncThing('bar');
+  return a + b;
+});
+
+promise
+  .then(value => console.log(value))
+  .catch(error => console.log(error));
+
+// "foobar"
+```
+> Flow control libraries like [tj/co](https://github.com/tj/co) combine the power of promises with generators to create easily comprehensible async code. Error handling also becomes simpler than the callback-based equivalent code since `try catch` and `throw` can be used. These libraries anticipate the ES7 `async function` syntax which will essentially allow the above style code natively.
