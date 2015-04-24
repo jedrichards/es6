@@ -50,6 +50,7 @@ The following resources were used to compile this document:
 - [Map](#map)
 - [Set](#set)
 - [Promise](#promise)
+- [Proxy](#proxy)
 
 ## Arrow function
 
@@ -147,18 +148,20 @@ console.log(b); // ReferenceError, b is undefined
 
 > Attempting to access `b` outside the block it's declared in will throw an error. Note the use of a naked `{}` block in this example to arbitrarily create a new scope.
 
-#### Hoisting and the TDZ
+#### Hoisting
 
 ```js
 {
   console.log(foo); // 'foo'
-  console.log(bar); // ReferenceError, bar is in the TDZ
+  console.log(bar); // ReferenceError: bar is in the 'TDZ'
   var foo = 'foo';
   let bar = 'bar';
 }
 ```
 
-> Unlike `var` declarations which are hoisted to the top of the enclosing scope `let` declarations may only be accessed after they've been declared. `let` variables are said to be in the scope's TDZ (temporal dead zone) before they've been declared, and any attempt to read or write them beforehand will result in an error. :warning: Most transpilers don't handle this behaviour fully to-spec, so the above example will probably only error in a native ES6 environment.
+> Unlike `var` declarations which are hoisted to the top of the enclosing scope `let` declarations may only be accessed after they've been declared. `let` variables are said to be in the scope's TDZ (temporal dead zone) before they've been declared, and any attempt to read or write them beforehand will result in an error.
+
+> :warning: Most transpilers don't handle this behaviour fully to-spec, so the above example will probably only error in a native ES6 environment.
 
 #### New scopes in loops
 
@@ -359,15 +362,17 @@ England`;
 #### Expression substitution
 
 ```js
-var name = "Billy";
+var name = 'Billy';
 var born = 1992;
 var now = () => new Date().getFullYear();
 
 var message = `${name} is ${now()-born} years old`;
-// "Billy is 23 years old"
+// 'Billy is 23 years old'
 ```
 
-> Template strings are able to evaluate any expression against their current scope using `${}` syntax. :warning: Be careful when building strings in this way from user input since you may introduce injection vulnerabilities, see tagged templates below for an alternative approach.
+> Template strings are able to evaluate any expression against their current scope using `${}` syntax.
+
+> :warning: Be careful when building strings in this way from user input since you may introduce injection vulnerabilities, see tagged templates below for an alternative approach.
 
 #### Tagged templates
 
@@ -382,12 +387,12 @@ function foo (literals,...values) {
     return 'foo';
 }
 
-var name = "Billy";
+var name = 'Billy';
 var born = 1992;
 var now = () => new Date().getFullYear();
 
 var message = foo`${name} is ${now()-born} years old`;
-// "foo"
+// 'foo'
 ```
 
 > By using the ``func`string`;`` syntax we invoke a template tag, that is a function to be run in order to process a template string. The first argument to the template tag is an array containing the sequence of plain strings, which is followed by the evaluated results of any expressions.
@@ -437,8 +442,10 @@ class Triangle extends Shape {
 
 var triangle = new Triangle();
 console.log(triangle.describe());
-// "A shape with 3 sides, A.K.A. a triangle"
+// 'A shape with 3 sides, A.K.A. a triangle'
 ```
+
+> Although contrived the above example demonstrates all features of the ES6 class construct.
 
 ## Object literal enhancements
 
@@ -456,7 +463,7 @@ var bar = 'bar';
 
 var o = {foo, bar};
 
-console.log(o); // {foo: 'foo', bar: 'bar'};
+console.log(o); // {foo: 'foo', bar: 'bar'}
 ```
 
 > When a new object literal is created and populated with properties of the same name that exist in the current scope then the above shorthand syntax can be used.
@@ -469,7 +476,7 @@ var o = {
   }
 };
 
-console.log(o); // {foo: [Function]};
+console.log(o); // {foo: [Function]}
 ```
 
 > Methods can be declared in object literals using the above shorthand. This syntax is shared with the new `class` constructs.
@@ -523,9 +530,9 @@ var data = {
 
 var {foo:newFoo,bar:newBar,baz:{qux:newQux}} = data;
 
-newFoo; // "foo"
-newBar; // "bar"
-newQux; // "qux"
+newFoo; // 'foo'
+newBar; // 'bar'
+newQux; // 'qux'
 ```
 
 > When destructuring, object literal notation syntax is used on the left side of the assignment operation to both describe the target data structure and name the new local variables to be declared.
@@ -540,8 +547,8 @@ var data = {
 
 var {foo,bar} = data;
 
-foo; // "foo"
-bar; // "bar"
+foo; // 'foo'
+bar; // 'bar'
 ```
 
 > A shorthand syntax can be used when the desired local variable names are the same as the object keys in the data.
@@ -553,9 +560,9 @@ var data = ['foo','bar',['baz']];
 
 var [foo,bar,[baz]] = data;
 
-foo; // "foo"
-bar; // "bar"
-baz; // "baz"
+foo; // 'foo'
+bar; // 'bar'
+baz; // 'baz'
 ```
 
 > Array literal notation syntax can be freely mixed with object literal notation syntax while destructuring.
@@ -601,7 +608,7 @@ function f ({foo,bar}) {
   console.log(bar);
 }
 
-f({foo:'foo',bar:'bar'}); // "foo" "bar"
+f({foo:'foo',bar:'bar'}); // 'foo' 'bar'
 ```
 
 > Destructuring can also be used inline in function parameters.
@@ -708,7 +715,7 @@ When referring to specific symbols outside of code the "@@" notation is used. Fo
 
 ```js
 var firstName = Symbol('firstName');
-console.log(firstName); // "Symbol(firstName)"
+console.log(firstName); // 'Symbol(firstName)'
 ```
 
 > Symbols are created with the `Symbol` function. Each new symbol value is unique. The argument passed to `Symbol()` is the symbol's description. It is good practice to always give a symbol a description to aid with debugging.
@@ -760,7 +767,7 @@ var iterator = [1,2,3][Symbol.iterator]();
 ```js
 var iterator = [1,2,3][Symbol.iterator]();
 
-console.log(iterator.next); // "[Function]"
+console.log(iterator.next); // '[Function]'
 ```
 
 > An iterator is an object that implements a `next` function.
@@ -832,12 +839,12 @@ for (let key of map.keys()) {
 > Arrays, sets and maps also expose the `entries`, `keys` and `values` functions for returning specialised iterators. The `keys` iterator loops over only the keys, the `values` iterator only the values, and the `entries` iterator the key/value pairs.
 
 ```js
-for (let char of "foo") {
+for (let char of 'foo') {
   console.log(char);
 }
-// "f"
-// "o"
-// "o"
+// 'f'
+// 'o'
+// 'o'
 ```
 
 > In ES6 strings also implement the iterable interface.
@@ -912,7 +919,9 @@ console.log(it.next()); // {value:undefined, done:true}
 
 ```
 
-> A `return` statement can be used in a generator function body to terminate the iteration and indicate a final `value` emitted together with `done:true`. :warning: Be careful when using `return` in a generator; a `for in` loop will discard the final returned value and not loop over it since at that point `done:true`.
+> A `return` statement can be used in a generator function body to terminate the iteration and indicate a final `value` emitted together with `done:true`.
+
+> :warning: Be careful when using `return` in a generator; a `for in` loop will discard the final returned value and not loop over it since at that point `done:true`.
 
 ```js
 var o = {
@@ -921,7 +930,7 @@ var o = {
 
 var it = o.makeGenerator();
 
-console.log(it.next); // "Function"
+console.log(it.next); // 'Function'
 ```
 
 > Generators can be defined in objects and classes using the shorthand method syntax.
@@ -944,9 +953,9 @@ function * makeGenerator () {
 }
 
 var it = makeGenerator();
-var result = it.next(); // "Hello"
+var result = it.next(); // 'Hello'
 console.log(result); // {value:1, done:false}
-result = it.next(); // "World"
+result = it.next(); // 'World'
 console.log(result); // {value:undefined, done:true}
 ```
 
@@ -1076,10 +1085,10 @@ map.set(key2, 'bar');
 map.set(key3, 'baz');
 map.set(key4, 'qux');
 
-map.get(key1); // "foo"
-map.get(key2); // "bar"
-map.get(key3); // "baz"
-map.get(key4); // "qux"
+map.get(key1); // 'foo'
+map.get(key2); // 'bar'
+map.get(key3); // 'baz'
+map.get(key4); // 'qux'
 ```
 
 > Any value can be a key, even an object or a function.
@@ -1161,7 +1170,7 @@ var map = new Map([
 ]);
 
 var values = [...map.values()];
-console.log(values); // "foo", "bar", "baz"
+console.log(values); // 'foo', 'bar', 'baz'
 ```
 
 > The iterators of `Map` can be used to convert the data structure into an array using the `...` spread operator.
@@ -1180,7 +1189,7 @@ var map2 = new Map(
   .map(([key,value]) => [key * 2, value])
 );
 
-console.log(map2); // {6:"c", 8:"d"}
+console.log(map2); // {6:'c', 8:'d'}
 ```
 
 > The concise conversion between `Map` and `Array` can be used to leverage array's `filter()` and `map()` functions to process the underlying data structure.
@@ -1337,7 +1346,7 @@ promise
   .then(value => console.log('success',value))
   .catch(error => console.log('fail',error));
 
-// "success yay!"
+// 'success yay!'
 ```
 
 > A promise can be instantiated and then resolved or rejected within a callback passed to its constructor.
@@ -1353,7 +1362,7 @@ promise
   .then(value => console.log('success',value))
   .catch(error => console.log('fail',error));
 
-// "fail [Error: Poop!]"
+// 'fail [Error: Poop!]'
 ```
 
 > A more concise and efficient approach is to leverage the static methods `Promise.resolve()` and `Promise.reject()` which return an immediately resolved or rejected promise directly.
@@ -1365,7 +1374,7 @@ Promise.resolve()
   .then(() => 'foo')
   .then(value => console.log(value));
 
-// "foo"
+// 'foo'
 ```
 
 > Any value returned in a fulfillment callback is appended onto the promise chain. When returning a primitive value it is wrapped in a promise and immediately resolved.
@@ -1375,10 +1384,10 @@ Promise.resolve()
   .then(() => Promise.resolve('foo'))
   .then(value => console.log(value));
 
-// "foo"
+// 'foo'
 ```
 
-> So-called "thenable" objects, i.e. other promises, can also be returned from a fulfillment callback. In which case the chain will wait for the promise to settle and then propagate its fulfilled or rejected state into the chain.
+> So-called *thenable* objects, i.e. other promises, can also be returned from a fulfillment callback. In which case the chain will wait for the promise to settle and then propagate its fulfilled or rejected state into the chain.
 
 ```js
 function asyncThing (value) {
@@ -1389,7 +1398,7 @@ Promise.resolve('foo')
   .then(asyncThing)
   .then(value => console.log(value));
 
-// "foo"
+// 'foo'
 ```
 
 > When chaining async methods that take a single argument and return a promise they can be directly and concisely inserted into the `then` chain by reference without the need to wrap them in an anonymous callback function.
@@ -1405,7 +1414,7 @@ promise
   .then(value => console.log(value))
   .catch(error => console.log(error));
 
-// "[Error: Poop!]"
+// '[Error: Poop!]'
 ```
 
 > Any errors thrown by code in the promise setup function passed to its constructor will propagate into the promise chain and surface in the first rejection callback.
@@ -1473,7 +1482,6 @@ Promise
 #### Promises and generators
 
 ```js
-
 function asyncThing (value) {
   return Promise.resolve(value);
 }
@@ -1488,6 +1496,114 @@ promise
   .then(value => console.log(value))
   .catch(error => console.log(error));
 
-// "foobar"
+// 'foobar'
 ```
+
 > Flow control libraries like [tj/co](https://github.com/tj/co) combine the power of promises with generators to create easily comprehensible async code. Error handling also becomes simpler than the callback-based equivalent code since `try catch` and `throw` can be used. These libraries anticipate the ES7 `async function` syntax which will essentially allow the above style code natively.
+
+## Proxy
+
+### Description
+
+Proxies are a meta-programming feature in ES6. They allow for the creation of handler objects that transparently intercept and customise operations performed on target objects.
+
+For each type of operation that can be performed on a target object (get, set etc.) there is a corresponding method that can be defined on the handler to intercept the operation and customise it. These operation interceptors are termed "traps".
+
+If the handler does not have a trap defined for a particular operation it transparently forwards the operation back to the target object. In this way a proxy can stand in for a target object while augmenting it with an outer layer of additional functionality. There is no way to tell if any particular object is being proxied or not.
+
+> :warning: Most transpilers can't create a true Proxy implementation, so a real ES6 environment may be needed to work with these objects.
+
+### Examples
+
+#### Simple
+
+```js
+var target = {
+  foo: 'foo'
+};
+
+var handler = {
+  get (target, key) {
+    return 'bar';
+  }
+};
+
+var proxy = new Proxy(target, handler);
+
+console.log(proxy.foo); // 'bar'
+console.log(proxy.baz()); // Error: String 'bar' is not a function
+```
+
+> The 'get' trap intercepts every attempt to access any property on the target object. It works for property access and method invocation.
+
+#### Logger
+
+```js
+var target = {
+  foo: 'foo'
+};
+
+var handler = {
+  get (target, key) {
+    console.log('GET', key);
+    return target[key];
+  }
+};
+
+var proxy = new Proxy(target, handler);
+
+var foo = proxy.foo; // "GET foo"
+```
+
+> A simple logger could be created using a proxy. Proxies could also be a good choice for implementing profilers, mocks and spies since they can dynamically respond to arbitrary property access and method invocation.
+
+#### Web service resource
+
+```js
+function makeResouce (baseUrl) {
+  return new Proxy({}, {
+    get (target,key) {
+      return http.get(baseUrl + key);
+    }
+  });
+}
+
+var api = makeResource('http://api.domain.com/');
+
+api.users().then(value => {
+  console.log(value);// api.domain.com/users JSON
+});
+```
+
+> Another example use for a proxy could be a REST web service utility. REST resource names could be intercepted from arbitrary method calls and used to build the request url.
+
+#### More traps
+
+```js
+var handler = {
+  get (target,key) {
+    // proxy.foo
+    // proxy.foo()
+  },
+  set (target,key,value) {
+    // proxy.foo = 'bar';
+  },
+  ownKeys (target) {
+    // Object.keys(proxy)
+  },
+  has (target,key) {
+    // key in proxy
+  },
+  enumerate (target) {
+    // for ( x in proxy ) { }
+  },
+  deleteProperty (target,key) {
+    // delete foo
+  },
+  construct (target,args) {
+    // new proxy(..args)
+  }
+};
+```
+
+> The above is an incomplete list of additional traps that may be defined on the proxy handler.
