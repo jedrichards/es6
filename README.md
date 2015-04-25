@@ -1563,7 +1563,7 @@ var foo = proxy.foo; // "GET foo"
 function makeResouce (baseUrl) {
   return new Proxy({}, {
     get (target,key) {
-      return http.get(baseUrl + key);
+      return () => http.get(baseUrl + key);
     }
   });
 }
