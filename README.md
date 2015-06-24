@@ -206,7 +206,7 @@ The `const` keyword works much the same as the `let` keyword in that it declares
 
 ### Examples
 
-#### Read only
+#### Read only values
 
 ```js
 const foo = 'foo';
@@ -220,7 +220,7 @@ const a = [];
 a.push('foo');
 ```
 
-> The above code does produce an error, since the `const` keyword only safeguards the pointer to the value, not the value itself, which may change.
+> The above code does not produce an error, since the `const` keyword only safeguards the pointer to the value, not the value itself, which may change.
 
 ## Modules
 
